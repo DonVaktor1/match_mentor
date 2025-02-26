@@ -1,24 +1,24 @@
-import logo from './logo.svg';
-import './App.css';
+import { Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
+import ChooseAWay from "./pages/ChooseAWay";
+import MainForStudent from "./pages/MainForStudent";
+import MainForMentor from "./pages/MainForMentor";
+import RegistrationForStudent from "./pages/RegistrationForStudent";
+import RegistrationForMentor from "./pages/RegistrationForMentor";
+
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/registration_for_student" element={<RegistrationForStudent />} />
+      <Route path="/registration_for_mentor" element={<RegistrationForMentor />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/choose_a_way" element={<ChooseAWay />} />
+      <Route path="/main_for_student" element={<MainForStudent />} />
+      <Route path="/main_for_mentor" element={<MainForMentor />} />
+    </Routes>
   );
 }
 
