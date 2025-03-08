@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { UserContext } from "../UserContext";
 import "../styles/RegistrationForMentor.css";
 
 
@@ -15,6 +17,8 @@ function RegistrationForMentor() {
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { setUser } = useContext(UserContext);
+
 
   useEffect(() => {
     const checkRegistration = async () => {
@@ -46,7 +50,7 @@ function RegistrationForMentor() {
       alert("Будь ласка, заповніть усі поля.");
       return;
     }
-
+  
     try {
       await updateDoc(doc(db, "users", auth.currentUser.uid), {
         lastName,
@@ -58,11 +62,21 @@ function RegistrationForMentor() {
         description,
         registrationCompleted: true,
       });
+  
+      const userRef = doc(db, "users", auth.currentUser.uid);
+      const userSnap = await getDoc(userRef);
+  
+      if (userSnap.exists()) {
+        const updatedUserData = userSnap.data();
+        setUser(updatedUserData); 
+        localStorage.setItem("user", JSON.stringify(updatedUserData)); 
+      }
       navigate("/main_for_mentor");
     } catch (error) {
       alert("Помилка при збереженні даних: " + error.message);
     }
   };
+  
 
   if (loading) return <p>Завантаження...</p>;
 
@@ -107,6 +121,5 @@ function RegistrationForMentor() {
 
   );
 }
-
 
 export default RegistrationForMentor;
