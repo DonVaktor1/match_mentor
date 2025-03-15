@@ -42,7 +42,7 @@ function ChooseAWay() {
   };
 
   return (
-    <div className="container">
+    <div className="container_Choose_a_way">
   <h3>Реєстрація</h3>
   <input type="email" placeholder="Пошта" value={email} onChange={(e) => setEmail(e.target.value)} className="input" />
   <input type="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} className="input" />

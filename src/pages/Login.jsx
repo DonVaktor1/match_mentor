@@ -37,7 +37,7 @@ function Login() {
   };
 
   return (
-    <div className="container">
+    <div className="container_Login">
       <h2>Вхід</h2>
       <input
         type="email"

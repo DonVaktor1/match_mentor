@@ -6,6 +6,7 @@ import MainForStudent from "./pages/MainForStudent";
 import MainForMentor from "./pages/MainForMentor";
 import RegistrationForStudent from "./pages/RegistrationForStudent";
 import RegistrationForMentor from "./pages/RegistrationForMentor";
+import DetailsAboutMentor from "./pages/DetailsAboutMentor";
 import { UserProvider } from "./UserContext"; 
 
 function App() {
@@ -20,6 +21,8 @@ function App() {
 
         <Route path="/main_for_student" element={<WithHeader><MainForStudent /></WithHeader>} />
         <Route path="/main_for_mentor" element={<WithHeader><MainForMentor /></WithHeader>} />
+        <Route path="/details/:id" element={<WithHeader><DetailsAboutMentor /></WithHeader>} />
+        
       </Routes>
     </UserProvider>
   );
