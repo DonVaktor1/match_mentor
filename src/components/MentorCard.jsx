@@ -100,7 +100,7 @@ const MentorCard = ({ mentor }) => {
       <div style={styles.info}>
         <p><b>Вік:</b> {calculateAge(mentor.birthDate)}</p>
         <p><b>Стаж роботи:</b> {mentor.experience || "Не вказано"}</p>
-        <p><b>Рейтинг:</b> {mentor.rating || "5.0"}</p>
+        <p><b>Рейтинг:</b> {mentor.rating || "Відсутній"}</p>
       </div>
       <div style={styles.heart} onClick={toggleLike}>
         {liked ? "❤️" : "🤍"}
