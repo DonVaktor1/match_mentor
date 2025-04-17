@@ -7,6 +7,8 @@ import MainForMentor from "./pages/MainForMentor";
 import RegistrationForStudent from "./pages/RegistrationForStudent";
 import RegistrationForMentor from "./pages/RegistrationForMentor";
 import DetailsAboutMentor from "./pages/DetailsAboutMentor";
+import MyRequests from "./pages/MyRequests";
+import ProcessedRequests from "./pages/ProcessedRequests";
 import { UserProvider } from "./UserContext"; 
 
 function App() {
@@ -19,9 +21,14 @@ function App() {
         <Route path="/registration_for_mentor" element={<RegistrationForMentor />} />
         <Route path="/choose_a_way" element={<ChooseAWay />} />
 
+
         <Route path="/main_for_student" element={<WithHeader><MainForStudent /></WithHeader>} />
         <Route path="/main_for_mentor" element={<WithHeader><MainForMentor /></WithHeader>} />
         <Route path="/details/:id" element={<WithHeader><DetailsAboutMentor /></WithHeader>} />
+
+        <Route path="/myrequests" element={<WithHeader><MyRequests /></WithHeader>} />
+        <Route path="/processed_requests" element={<WithHeader><ProcessedRequests /></WithHeader>} />
+
         
       </Routes>
     </UserProvider>

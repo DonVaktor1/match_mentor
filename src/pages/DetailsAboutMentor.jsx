@@ -32,15 +32,15 @@ const DetailsAboutMentor = () => {
   useEffect(() => {
     if (!mentor) return;
   
-    const mentorRef = doc(db, "mentors", mentor.uid);
+    const mentorRef = doc(db, "users", mentor.uid);
   
     const unsubscribe = onSnapshot(mentorRef, (doc) => {
       if (doc.exists()) {
-        setRating(doc.data().rating || "5.0");
+        setMentorRating(doc.data().rating || "5.0");
       }
     });
   
-    return () => unsubscribe(); 
+    return () => unsubscribe();
   }, [mentor]);
 
   useEffect(() => {
@@ -169,76 +169,80 @@ const DetailsAboutMentor = () => {
     if (!user) return alert("Ви повинні бути авторизовані!");
     if (!canComment) return alert("Ви можете залишити коментар тільки після схвалення заявки ментором!");
     if (hasCommented) return alert("Ви вже залишили коментар!");
-
+  
     try {
-        console.log("=== Початок handleSubmit ===");
-        console.log("Користувач:", user);
-        console.log("Ментор:", mentor);
-        console.log("mentor.id:", mentor?.id);
-        const commentQuery = query(
-            collection(db, "comments"),
-            where("mentorUid", "==", mentor.id),
-            where("studentUid", "==", user.uid)
-        );
-        const commentSnapshot = await getDocs(commentQuery);
-        
-        if (!commentSnapshot.empty) {
-            return alert("Ви вже залишили коментар!");
+      console.log("=== Початок handleSubmit ===");
+      console.log("Користувач:", user);
+      console.log("Ментор:", mentor);
+      console.log("mentor.uid:", mentor?.uid);
+  
+      const commentQuery = query(
+        collection(db, "comments"),
+        where("mentorUid", "==", mentor.uid),
+        where("studentUid", "==", user.uid)
+      );
+  
+      const commentSnapshot = await getDocs(commentQuery);
+  
+      if (!commentSnapshot.empty) {
+        return alert("Ви вже залишили коментар!");
+      }
+  
+      await addDoc(collection(db, "comments"), {
+        mentorUid: mentor.uid,
+        studentUid: user.uid,
+        studentName: `${user.lastName} ${user.firstName}`,
+        rating: Number(rating),
+        comment: commentText,
+        timestamp: new Date(),
+      });
+  
+      const mentorRef = doc(db, "users", mentor.uid); 
+      console.log("Шлях до документа ментора:", mentorRef.path);
+  
+      await runTransaction(db, async (transaction) => {
+        console.log("Запускаємо транзакцію...");
+  
+        const mentorDoc = await transaction.get(mentorRef);
+        console.log("mentorDoc.exists():", mentorDoc.exists());
+  
+        if (!mentorDoc.exists()) {
+          throw new Error("Ментор не знайдений у Firestore!");
         }
-
-        await addDoc(collection(db, "comments"), {
-            mentorUid: mentor.id,
-            studentUid: user.uid,
-            studentName: `${user.lastName} ${user.firstName}`,
-            rating: Number(rating), 
-            comment: commentText,
-            timestamp: new Date(),
+  
+        const snapshot = await getDocs(
+          query(collection(db, "comments"), where("mentorUid", "==", mentor.uid)) 
+        );
+  
+        let totalRating = 0;
+        let ratingCount = 0;
+  
+        snapshot.forEach((doc) => {
+          const commentRating = Number(doc.data().rating);
+          if (!isNaN(commentRating)) {
+            totalRating += commentRating;
+            ratingCount++;
+          }
         });
-        const mentorRef = doc(db, "users", mentor.id);
-        console.log("Шлях до документа ментора:", mentorRef.path);
-
-        await runTransaction(db, async (transaction) => {
-            console.log("Запускаємо транзакцію...");
-            
-            const mentorDoc = await transaction.get(mentorRef);
-            console.log("mentorDoc.exists():", mentorDoc.exists());
-            
-            if (!mentorDoc.exists()) {
-                throw new Error("Ментор не знайдений у Firestore!");
-            }
-
-            const snapshot = await getDocs(
-                query(collection(db, "comments"), where("mentorUid", "==", mentor.id))
-            );
-
-            let totalRating = 0;
-            let ratingCount = 0;
-
-            snapshot.forEach((doc) => {
-                const commentRating = Number(doc.data().rating); 
-                if (!isNaN(commentRating)) {
-                    totalRating += commentRating;
-                    ratingCount++;
-                }
-            });
-
-            const averageRating = ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : "5.0";
-            console.log("Новий середній рейтинг:", averageRating);
-
-            transaction.update(mentorRef, {
-                rating: parseFloat(averageRating), 
-            });
-
-            setMentorRating(averageRating);
+  
+        const averageRating = ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : "5.0";
+        console.log("Новий середній рейтинг:", averageRating);
+  
+        transaction.update(mentorRef, {
+          rating: parseFloat(averageRating),
         });
-        setHasCommented(true);
-        setCommentText("");
-        setRating(5);
-        console.log("Коментар успішно додано!");
+  
+        setMentorRating(averageRating);
+      });
+  
+      setHasCommented(true);
+      setCommentText("");
+      setRating(5);
+      console.log("Коментар успішно додано!");
     } catch (error) {
-        console.error("Помилка при додаванні коментаря:", error);
+      console.error("Помилка при додаванні коментаря:", error);
     }
-};
+  };
 
   if (loading) return null;
   if (!mentor) return <p>Ментор не знайдений</p>;
@@ -278,7 +282,7 @@ const DetailsAboutMentor = () => {
         ) : isRequested === "approved" ? (
           <p className="mentor-requestSent">Заявка схвалена, ви можете залишити коментар.</p>
         ) : isRequested === "rejected" ? (
-          <p className="mentor-requestSent">Ваша заявка була відхилена.</p>
+          <p className="mentor-requestSent rejected-text">Ваша заявка була відхилена.</p>
         ) : (
           <p className="mentor-requestSent">Заявка вже надіслана!</p>
         )}

@@ -17,14 +17,13 @@ function MainForMentor() {
     if (!user?.uid) return;
 
     try {
-      console.log("🟡 Запит до Firestore для ментора:", user.uid);
-
       const q = query(collection(db, "requests"), where("mentorUid", "==", user.uid));
       const querySnapshot = await getDocs(q);
 
       const mentorRequests = await Promise.all(
         querySnapshot.docs.map(async (requestDoc) => {
           const requestData = requestDoc.data();
+          if (requestData.status !== "pending") return null;
 
           let studentData = null;
           if (requestData.studentUid) {
@@ -43,8 +42,7 @@ function MainForMentor() {
         })
       );
 
-      console.log("🔵 Отримано заявки:", mentorRequests);
-      setRequests(mentorRequests);
+      setRequests(mentorRequests.filter(Boolean));
     } catch (error) {
       console.error("🔴 Помилка отримання заявок:", error);
     }
@@ -59,11 +57,7 @@ function MainForMentor() {
       const requestRef = doc(db, "requests", id);
       await updateDoc(requestRef, { status });
 
-      setRequests((prevRequests) =>
-        prevRequests.map((request) =>
-          request.id === id ? { ...request, status } : request
-        )
-      );
+      setRequests((prev) => prev.filter((r) => r.id !== id));
     } catch (error) {
       console.error("Помилка при оновленні статусу заявки:", error);
     }
@@ -82,9 +76,9 @@ function MainForMentor() {
   return (
     <div className="container">
       <h1>👨‍🏫 Вітаємо, {user?.firstName}!</h1>
-      <p>Тут ти можеш переглянути заявки на менторство.</p>
+      <p>Тут ти можеш переглянути нові заявки на менторство.</p>
 
-      <h2>📩 Отримані заявки:</h2>
+      <h2>🕓 Нові заявки:</h2>
       <div className="requestsContainer">
         {requests.length > 0 ? (
           requests.map((request) => (
@@ -99,16 +93,12 @@ function MainForMentor() {
               ) : (
                 <div className="card">
                   <p className="error">⚠️ Дані про учня відсутні</p>
-                  <p>
-                    <b>Статус заявки:</b>{" "}
-                    <span className={`status ${request.status}`}>{request.status}</span>
-                  </p>
                 </div>
               )}
             </div>
           ))
         ) : (
-          <p>Немає заявок</p>
+          <p>Нових заявок немає</p>
         )}
       </div>
 

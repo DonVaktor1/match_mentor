@@ -37,10 +37,11 @@ const StudentCard = ({ student, status = "pending", onApprove, onReject }) => {
       alignItems: "center",
       width: "500px",
       padding: "20px",
-      background: "#eee",
-      borderRadius: "10px",
-      marginBottom: "10px",
+      background: "#f5f5f5",
+      borderRadius: "12px",
+      marginBottom: "20px",
       textAlign: "center",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
       position: "relative",
     },
     avatarContainer: {
@@ -53,6 +54,7 @@ const StudentCard = ({ student, status = "pending", onApprove, onReject }) => {
       alignItems: "center",
       justifyContent: "center",
       marginBottom: "10px",
+      boxShadow: "0 0 5px rgba(0, 0, 0, 0.2)",
     },
     avatar: {
       width: "100%",
@@ -60,44 +62,37 @@ const StudentCard = ({ student, status = "pending", onApprove, onReject }) => {
       objectFit: "cover",
     },
     name: {
-      fontSize: "20px",
-      fontWeight: "bold",
+      fontSize: "22px",
+      fontWeight: "600",
       marginBottom: "10px",
     },
     info: {
       textAlign: "left",
       width: "100%",
-      padding: "0 20px",
+      fontSize: "16px",
     },
-    buttons: {
-      display: "flex",
-      justifyContent: "center",
-      gap: "10px",
+    statusText: {
       marginTop: "15px",
+      fontWeight: "bold",
+      fontSize: "16px",
     },
-    button: {
+    actionButton: {
       padding: "10px 20px",
       fontSize: "14px",
       border: "none",
-      borderRadius: "5px",
+      borderRadius: "8px",
       cursor: "pointer",
-      color: "white",
+      margin: "10px",
+      fontWeight: "600",
+      transition: "background 0.3s",
     },
     approveButton: {
-      background: "#28a745",
+      background: "#4CAF50",
+      color: "white",
     },
     rejectButton: {
-      background: "#dc3545",
-    },
-    statusText: {
-      fontWeight: "bold",
-      marginTop: "10px",
-      color:
-        localStatus === "approved"
-          ? "#28a745"
-          : localStatus === "rejected"
-          ? "#dc3545"
-          : "#f39c12",
+      background: "#F44336",
+      color: "white",
     },
   };
 
@@ -134,25 +129,30 @@ const StudentCard = ({ student, status = "pending", onApprove, onReject }) => {
       </div>
 
       {localStatus === "pending" ? (
-        <div style={styles.buttons}>
+        <div>
           <button
-            style={{ ...styles.button, ...styles.approveButton }}
+            style={{ ...styles.actionButton, ...styles.approveButton }}
             onClick={handleApprove}
           >
-            Прийняти заявку
+            Прийняти
           </button>
           <button
-            style={{ ...styles.button, ...styles.rejectButton }}
+            style={{ ...styles.actionButton, ...styles.rejectButton }}
             onClick={handleReject}
           >
-            Відхилити заявку
+            Відхилити
           </button>
         </div>
       ) : (
-        <p style={styles.statusText}>
+        <p
+          style={{
+            ...styles.statusText,
+            color: localStatus === "approved" ? "#4CAF50" : "#F44336",
+          }}
+        >
           {localStatus === "approved"
-            ? "✅ Заявку прийнято"
-            : "❌ Заявку відхилено"}
+            ? "✅ Ви прийняли заявку на менторство"
+            : "❌ Ви відхилили заявку на менторство"}
         </p>
       )}
     </div>

@@ -19,9 +19,13 @@ const Header = () => {
         <span className="title">{user ? `${user.lastName} ${user.firstName}` : "Користувач"}</span>
       </div>
       <nav>
-        <a href="/search">Пошук</a>
-        <a href="/applications">Мої заявки</a>
-        <a href="/chat">Чат</a>
+        <a href={user?.role === "mentor" ? "/main_for_mentor" : "/main_for_student"}>
+          Пошук
+        </a>
+  
+        <a href={user?.role === "mentor" ? "/processed_requests" : "/myrequests"}>
+          Мої заявки
+        </a>
       </nav>
     </div>
   );

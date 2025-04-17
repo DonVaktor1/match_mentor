@@ -16,17 +16,36 @@ function MainForStudent() {
   useEffect(() => {
     const fetchMentors = async () => {
       try {
-        const q = query(collection(db, "users"), where("role", "==", "mentor"));
-        const querySnapshot = await getDocs(q);
-        const mentorsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setMentors(mentorsList);
+        const requestsQuery = query(
+          collection(db, "requests"),
+          where("studentUid", "==", user.uid)
+        );
+        const requestsSnapshot = await getDocs(requestsQuery);
+        const sentMentorUids = requestsSnapshot.docs.map(doc => doc.data().mentorUid);
+        const mentorsQuery = query(
+          collection(db, "users"),
+          where("role", "==", "mentor")
+        );
+        const mentorsSnapshot = await getDocs(mentorsQuery);
+        const allMentors = mentorsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+  
+        const availableMentors = allMentors.filter(
+          mentor => !sentMentorUids.includes(mentor.uid) 
+        );
+  
+        setMentors(availableMentors);
       } catch (error) {
-        console.error("Помилка завантаження менторів:", error);
+        console.error("Помилка при завантаженні менторів або заявок:", error);
       }
     };
-
-    fetchMentors();
-  }, []);
+  
+    if (user) {
+      fetchMentors();
+    }
+  }, [user]);
 
   const handleLogout = async () => {
     try {

@@ -1,0 +1,30 @@
+.my-requests-container {
+  text-align: center;
+  padding: 50px;
+  font-size: 20px;
+}
+
+.request-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.status {
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+
+.status.pending {
+  color: #007bff;
+}
+
+.status.approved {
+  color: green;
+}
+
+.status.rejected {
+  color: red;
+}

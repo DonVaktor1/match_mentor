@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 
 const calculateAge = (birthDate) => {
@@ -16,17 +16,33 @@ const calculateAge = (birthDate) => {
   return age > 0 ? age : "Невідомо";
 };
 
-const MentorCard = ({ mentor }) => {
-  const [liked, setLiked] = useState(false);
+const MentorCard = ({ mentor, status }) => {
   const navigate = useNavigate();
 
   if (!mentor) return null;
 
-  const toggleLike = () => setLiked(!liked);
-
   const goToDetails = () => {
     navigate(`/details/${mentor.id}`, { state: { mentor } });
   };
+
+  let statusText = "";
+  let statusColor = "";
+
+  switch (status) {
+    case "approved":
+      statusText = "✅ Вашу заявку прийнято";
+      statusColor = "#4CAF50"; 
+      break;
+    case "rejected":
+      statusText = "❌ Вашу заявку відхилено";
+      statusColor = "#F44336"; 
+      break;
+    case "pending":
+    default:
+      statusText = "⏳ Вашу заявку надіслано";
+      statusColor = "#2196F3"; 
+      break;
+  }
 
   const styles = {
     card: {
@@ -35,10 +51,11 @@ const MentorCard = ({ mentor }) => {
       alignItems: "center",
       width: "500px",
       padding: "20px",
-      background: "#ddd",
-      borderRadius: "10px",
-      marginBottom: "10px",
+      background: "#f5f5f5",
+      borderRadius: "12px",
+      marginBottom: "20px",
       textAlign: "center",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
       position: "relative",
     },
     avatarContainer: {
@@ -51,6 +68,7 @@ const MentorCard = ({ mentor }) => {
       alignItems: "center",
       justifyContent: "center",
       marginBottom: "10px",
+      boxShadow: "0 0 5px rgba(0, 0, 0, 0.2)",
     },
     avatar: {
       width: "100%",
@@ -58,22 +76,21 @@ const MentorCard = ({ mentor }) => {
       objectFit: "cover",
     },
     name: {
-      fontSize: "20px",
-      fontWeight: "bold",
+      fontSize: "22px",
+      fontWeight: "600",
       marginBottom: "10px",
     },
     info: {
       textAlign: "left",
       width: "100%",
+      fontSize: "16px",
     },
-    heart: {
-      fontSize: "24px",
-      color: liked ? "red" : "black",
-      cursor: "pointer",
-      position: "absolute",
-      right: "15px",
-      top: "50%",
-      transform: "translateY(-50%)",
+    statusText: {
+      marginTop: "15px",
+      fontWeight: "bold",
+      fontSize: "16px",
+      color: statusColor,
+      
     },
     detailsButton: {
       position: "absolute",
@@ -81,8 +98,8 @@ const MentorCard = ({ mentor }) => {
       right: "10px",
       padding: "10px 15px",
       fontSize: "14px",
-      background: "#007bff",
-      color: "white",
+      background: "#66ff99",
+      color: "black",
       border: "none",
       borderRadius: "5px",
       cursor: "pointer",
@@ -96,16 +113,29 @@ const MentorCard = ({ mentor }) => {
           <img src={mentor.avatarUrl} alt="Аватар" style={styles.avatar} />
         )}
       </div>
-      <p style={styles.name}>{mentor.lastName} {mentor.firstName}</p>
+      <p style={styles.name}>
+        {mentor.lastName} {mentor.firstName}
+      </p>
       <div style={styles.info}>
-        <p><b>Вік:</b> {calculateAge(mentor.birthDate)}</p>
-        <p><b>Стаж роботи:</b> {mentor.experience || "Не вказано"}</p>
-        <p><b>Рейтинг:</b> {mentor.rating || "Відсутній"}</p>
+        <p>
+          <b>Вік:</b> {calculateAge(mentor.birthDate)}
+        </p>
+        <p>
+          <b>Категорія:</b> {mentor.category}
+        </p>
+        <p>
+          <b>Стаж роботи:</b> {mentor.experience || "Не вказано"}
+        </p>
+        <p>
+          <b>Рейтинг:</b> {mentor.rating || "Відсутній"}
+        </p>
       </div>
-      <div style={styles.heart} onClick={toggleLike}>
-        {liked ? "❤️" : "🤍"}
-      </div>
-      <button style={styles.detailsButton} onClick={goToDetails}>Деталі</button>
+
+      {status && <p style={styles.statusText}>{statusText}</p>}
+
+      <button style={styles.detailsButton} onClick={goToDetails}>
+        Деталі
+      </button>
     </div>
   );
 };
