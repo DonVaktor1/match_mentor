@@ -2,12 +2,16 @@ import React, { useContext, useEffect, useState } from "react";
 import { UserContext } from "../UserContext";
 import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import { useAuth } from "../hooks/useAuth";
 import "../styles/MyRequests.css";
 import MentorCard from "../components/MentorCard";
 
 function MyRequests() {
+  useAuth(["student"]);
+
   const { user } = useContext(UserContext);
   const [requestsWithMentors, setRequestsWithMentors] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -26,7 +30,7 @@ function MyRequests() {
             return {
               id: docSnap.id,
               status: request.status,
-              mentor: mentorSnap.exists() ? mentorSnap.data() : null,
+              mentor: mentorSnap.exists() ? { ...mentorSnap.data(), uid: request.mentorUid } : null,
             };
           })
         );
@@ -42,20 +46,41 @@ function MyRequests() {
     }
   }, [user]);
 
+  const filteredRequests = statusFilter
+    ? requestsWithMentors.filter((r) => r.status === statusFilter)
+    : requestsWithMentors;
+
   return (
     <div className="my-requests-container">
       <h2>📋 Мої заявки</h2>
-      {requestsWithMentors.length > 0 ? (
-        requestsWithMentors.map(({ id, mentor, status }) => (
+
+      <div className="filters">
+        <label className="filter-label">
+          Статус:
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="filter-select"
+          >
+            <option value="">Усі</option>
+            <option value="pending">Очікує підтвердження</option>
+            <option value="approved">Схвалені</option>
+            <option value="rejected">Відхилені</option>
+          </select>
+        </label>
+      </div>
+
+      {filteredRequests.length > 0 ? (
+        filteredRequests.map(({ id, mentor, status }) => (
           <div key={id} className="request-card">
-            <MentorCard mentor={mentor} status={status} />
+            <MentorCard mentor={mentor} status={status} studentUid={user.uid} />
           </div>
         ))
       ) : (
-        <p>У вас ще немає заявок.</p>
+        <p>Немає заявок, які відповідають обраному фільтру.</p>
       )}
     </div>
-  );  
+  );
 }
 
 export default MyRequests;

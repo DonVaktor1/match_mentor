@@ -101,7 +101,7 @@ const DetailsAboutMentor = () => {
 
   useEffect(() => {
     if (!mentor) return;
-    
+  
     const q = query(
       collection(db, "comments"),
       where("mentorUid", "==", mentor.uid),
@@ -114,14 +114,18 @@ const DetailsAboutMentor = () => {
   
       if (fetchedComments.length > 0) {
         const totalRating = fetchedComments.reduce((sum, c) => sum + c.rating, 0);
-        setRating((totalRating / fetchedComments.length).toFixed(1));
+        const avg = totalRating / fetchedComments.length;
+        setRating(avg.toFixed(1));
+        setMentorRating(avg.toFixed(1));
       } else {
         setRating("5.0");
+        setMentorRating(null); 
       }
     });
   
     return () => unsubscribe();
   }, [mentor]);
+  
 
   const calculateAge = (birthDate) => {
     const birth = new Date(birthDate);
@@ -162,8 +166,7 @@ const DetailsAboutMentor = () => {
       console.error("Помилка при надсиланні заявки:", error);
     }
   };
-  
-
+ 
   const handleSubmit = async () => {
     if (!commentText.trim()) return alert("Коментар не може бути порожнім!");
     if (!user) return alert("Ви повинні бути авторизовані!");
@@ -268,7 +271,7 @@ const DetailsAboutMentor = () => {
         <p><b>Стать:</b> {mentor.gender || "Не вказано"}</p>
         <p><b>Категорія:</b> {mentor.category || "Не вказано"}</p>
         <p><b>Досвід:</b> {mentor.experience || "Не вказано"}</p>
-        <p><b>Рейтинг:</b> {mentorRating}</p>
+        <p><b>Рейтинг:</b> {mentorRating ? Number(mentorRating).toFixed(1) : "Відсутній"}</p>
         <p><b>Опис:</b> {mentor.description || "Немає опису"}</p>
       </div>
 

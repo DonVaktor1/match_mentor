@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getOrCreateChat } from "../hooks/chatService";
+
 
 const calculateAge = (birthDate) => {
   const birth = new Date(birthDate);
@@ -15,8 +18,10 @@ const calculateAge = (birthDate) => {
   return age > 0 ? age : "Невідомо";
 };
 
-const StudentCard = ({ student, status = "pending", onApprove, onReject }) => {
+const StudentCard = ({ student, status = "pending", onApprove, onReject, mentorUid }) =>  {
   const [localStatus, setLocalStatus] = useState(status);
+  const navigate = useNavigate();
+
 
   if (!student) return null;
 
@@ -30,6 +35,18 @@ const StudentCard = ({ student, status = "pending", onApprove, onReject }) => {
     if (onReject) onReject(student);
   };
 
+  const handleWriteMessage = async () => {
+    try {
+      const chatId = await getOrCreateChat(student.uid, mentorUid);
+      if (chatId) {
+        navigate(`/chat/${mentorUid}/${student.uid}`);
+      }
+    } catch (error) {
+      console.error("Помилка при переході в чат:", error);
+    }
+  };
+  
+  
   const styles = {
     card: {
       display: "flex",
@@ -127,7 +144,7 @@ const StudentCard = ({ student, status = "pending", onApprove, onReject }) => {
           <b>Опис:</b> {student.description || "Без опису"}
         </p>
       </div>
-
+  
       {localStatus === "pending" ? (
         <div>
           <button
@@ -144,19 +161,31 @@ const StudentCard = ({ student, status = "pending", onApprove, onReject }) => {
           </button>
         </div>
       ) : (
-        <p
-          style={{
-            ...styles.statusText,
-            color: localStatus === "approved" ? "#4CAF50" : "#F44336",
-          }}
-        >
-          {localStatus === "approved"
-            ? "✅ Ви прийняли заявку на менторство"
-            : "❌ Ви відхилили заявку на менторство"}
-        </p>
+        <>
+          <p
+            style={{
+              ...styles.statusText,
+              color: localStatus === "approved" ? "#4CAF50" : "#F44336",
+            }}
+          >
+            {localStatus === "approved"
+              ? "✅ Ви прийняли заявку на менторство"
+              : "❌ Ви відхилили заявку на менторство"}
+          </p>
+  
+          {localStatus === "approved"  && (
+              <button
+               style={{ ...styles.actionButton, background: "#2196F3", color: "white" }}
+                onClick={handleWriteMessage}
+               >
+                💬 Написати
+              </button>
+          )}
+        </>
       )}
     </div>
   );
+  
 };
 
 export default StudentCard;

@@ -28,3 +28,26 @@
 .status.rejected {
   color: red;
 }
+
+.filters {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  gap: 10px;
+}
+
+.filter-label {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-select {
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  min-width: 160px;
+}

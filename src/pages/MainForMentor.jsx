@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect, useCallback } from "react";
 import { UserContext } from "../UserContext";
-import { auth, db } from "../firebase";
-import { useNavigate } from "react-router-dom";
+import {db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
 import { collection, getDocs, updateDoc, doc, query, where, getDoc } from "firebase/firestore";
 import StudentCard from "../components/StudentCard";
@@ -10,7 +9,6 @@ import "../styles/MainForMentor.css";
 function MainForMentor() {
   useAuth(["mentor"]);
   const { user } = useContext(UserContext);
-  const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
 
   const fetchRequests = useCallback(async () => {
@@ -44,7 +42,7 @@ function MainForMentor() {
 
       setRequests(mentorRequests.filter(Boolean));
     } catch (error) {
-      console.error("🔴 Помилка отримання заявок:", error);
+      console.error("Помилка отримання заявок:", error);
     }
   }, [user?.uid]);
 
@@ -62,23 +60,12 @@ function MainForMentor() {
       console.error("Помилка при оновленні статусу заявки:", error);
     }
   };
-
-  const handleLogout = async () => {
-    try {
-      await auth.signOut();
-      localStorage.removeItem("user");
-      navigate("/login");
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
-  };
-
   return (
     <div className="container">
-      <h1>👨‍🏫 Вітаємо, {user?.firstName}!</h1>
+      <h1>Вітаємо, {user?.firstName}!</h1>
       <p>Тут ти можеш переглянути нові заявки на менторство.</p>
-
-      <h2>🕓 Нові заявки:</h2>
+  
+      <h2>Нові заявки:</h2>
       <div className="requestsContainer">
         {requests.length > 0 ? (
           requests.map((request) => (
@@ -87,6 +74,7 @@ function MainForMentor() {
                 <StudentCard
                   student={request.studentData}
                   status={request.status}
+                  mentorUid={user.uid}
                   onApprove={() => updateRequestStatus(request.id, "approved")}
                   onReject={() => updateRequestStatus(request.id, "rejected")}
                 />
@@ -101,10 +89,6 @@ function MainForMentor() {
           <p>Нових заявок немає</p>
         )}
       </div>
-
-      <button className="logoutButton" onClick={handleLogout}>
-        Вийти
-      </button>
     </div>
   );
 }

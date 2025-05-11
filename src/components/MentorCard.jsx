@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { getOrCreateChat } from "../hooks/chatService"; 
 
 const calculateAge = (birthDate) => {
   const birth = new Date(birthDate);
@@ -16,7 +17,7 @@ const calculateAge = (birthDate) => {
   return age > 0 ? age : "Невідомо";
 };
 
-const MentorCard = ({ mentor, status }) => {
+const MentorCard = ({ mentor, status, studentUid }) => {
   const navigate = useNavigate();
 
   if (!mentor) return null;
@@ -25,22 +26,32 @@ const MentorCard = ({ mentor, status }) => {
     navigate(`/details/${mentor.id}`, { state: { mentor } });
   };
 
+  const goToChat = async () => {
+    const chatId = await getOrCreateChat(studentUid, mentor.uid);
+    if (chatId) {
+      navigate(`/chat/${mentor.uid}/${studentUid}`);
+    } else {
+      alert("Не вдалося перейти в чат.");
+    }
+  };
+  
+
   let statusText = "";
   let statusColor = "";
 
   switch (status) {
     case "approved":
       statusText = "✅ Вашу заявку прийнято";
-      statusColor = "#4CAF50"; 
+      statusColor = "#4CAF50";
       break;
     case "rejected":
       statusText = "❌ Вашу заявку відхилено";
-      statusColor = "#F44336"; 
+      statusColor = "#F44336";
       break;
     case "pending":
     default:
       statusText = "⏳ Вашу заявку надіслано";
-      statusColor = "#2196F3"; 
+      statusColor = "#2196F3";
       break;
   }
 
@@ -63,7 +74,7 @@ const MentorCard = ({ mentor, status }) => {
       height: "100px",
       borderRadius: "50%",
       overflow: "hidden",
-      background: "#fff",
+      background: "#ccc",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -90,7 +101,6 @@ const MentorCard = ({ mentor, status }) => {
       fontWeight: "bold",
       fontSize: "16px",
       color: statusColor,
-      
     },
     detailsButton: {
       position: "absolute",
@@ -104,34 +114,47 @@ const MentorCard = ({ mentor, status }) => {
       borderRadius: "5px",
       cursor: "pointer",
     },
+    chatButton: {
+      marginTop: "10px",
+      padding: "8px 12px",
+      fontSize: "14px",
+      background: "#2196F3",
+      color: "white",
+      border: "none",
+      borderRadius: "6px",
+      cursor: "pointer",
+    },
   };
 
   return (
     <div style={styles.card}>
       <div style={styles.avatarContainer}>
-        {mentor.avatarUrl && (
+        {mentor.avatarUrl ? (
           <img src={mentor.avatarUrl} alt="Аватар" style={styles.avatar} />
+        ) : (
+          <span style={{ fontSize: "32px", fontWeight: "bold", backdropFilter: "#ccc" }}>
+            {mentor.firstName && mentor.lastName
+              ? `${mentor.firstName[0]}${mentor.lastName[0]}`.toUpperCase()
+              : "?"}
+          </span>
         )}
       </div>
       <p style={styles.name}>
         {mentor.lastName} {mentor.firstName}
       </p>
       <div style={styles.info}>
-        <p>
-          <b>Вік:</b> {calculateAge(mentor.birthDate)}
-        </p>
-        <p>
-          <b>Категорія:</b> {mentor.category}
-        </p>
-        <p>
-          <b>Стаж роботи:</b> {mentor.experience || "Не вказано"}
-        </p>
-        <p>
-          <b>Рейтинг:</b> {mentor.rating || "Відсутній"}
-        </p>
+        <p><b>Вік:</b> {calculateAge(mentor.birthDate)}</p>
+        <p><b>Категорія:</b> {mentor.category}</p>
+        <p><b>Стаж роботи:</b> {mentor.experience || "Не вказано"}</p>
+        <p><b>Рейтинг:</b> {mentor.rating || "Відсутній"}</p>
       </div>
 
       {status && <p style={styles.statusText}>{statusText}</p>}
+      {status === "approved" && (
+        <button style={styles.chatButton} onClick={goToChat}>
+          💬 Написати
+        </button>
+      )}
 
       <button style={styles.detailsButton} onClick={goToDetails}>
         Деталі

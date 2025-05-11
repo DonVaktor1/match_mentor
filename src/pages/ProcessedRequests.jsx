@@ -3,11 +3,14 @@ import { UserContext } from "../UserContext";
 import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import StudentCard from "../components/StudentCard";
-import "../styles/ProcessedRequests.css";
+import { useAuth } from "../hooks/useAuth";
 
 function ProcessedRequests() {
+  useAuth(["mentor"]);
+
   const { user } = useContext(UserContext);
   const [requests, setRequests] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
     const fetchProcessedRequests = async () => {
@@ -41,18 +44,43 @@ function ProcessedRequests() {
     if (user?.uid) fetchProcessedRequests();
   }, [user?.uid]);
 
+
+  const filteredRequests = statusFilter
+    ? requests.filter((r) => r.status === statusFilter)
+    : requests;
+
   return (
     <div className="container">
-      <h1>📂 Оброблені заявки</h1>
+      <h1>Оброблені заявки</h1>
+
+      <div className="filters">
+        <label className="filter-label">
+          Статус:
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="filter-select"
+          >
+            <option value="">Усі</option>
+            <option value="approved">Схвалені</option>
+            <option value="rejected">Відхилені</option>
+          </select>
+        </label>
+      </div>
+
       <div className="requestsContainer">
-        {requests.length > 0 ? (
-          requests.map((request) => (
+        {filteredRequests.length > 0 ? (
+          filteredRequests.map((request) => (
             <div key={request.id} className="cardWrapper">
-              <StudentCard student={request.studentData} status={request.status} />
+              <StudentCard
+                student={request.studentData}
+                status={request.status}
+                mentorUid={user?.uid}
+              />
             </div>
           ))
         ) : (
-          <p>Оброблених заявок поки що немає.</p>
+          <p>Оброблених заявок, які відповідають обраному фільтру, поки що немає.</p>
         )}
       </div>
     </div>
